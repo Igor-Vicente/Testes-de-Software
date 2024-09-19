@@ -24,7 +24,6 @@ namespace Features.Tests.Mock
             var cliente = _clienteTestsBogus.GerarClienteValido();
             var clienteRepository = new Mock<IClienteRepository>();
             var mediatr = new Mock<IMediator>();
-
             var clienteService = new ClienteService(clienteRepository.Object, mediatr.Object);
 
             //Act
@@ -49,6 +48,24 @@ namespace Features.Tests.Mock
             //Assert 
             clienteRepository.Verify(r => r.Adicionar(cliente), Times.Never);
             mediatr.Verify(m => m.Publish(It.IsAny<INotification>(), CancellationToken.None), Times.Never);
+        }
+
+        [Fact(DisplayName = "Obter Todos Clientes Ativos")]
+        [Trait("Categoria", "ClienteService Mock Tests")]
+        public void ClienteService_ObterTodosAtivos_DeveObterListaClientesAtivos()
+        {
+            //Arrange
+            var clienteRepository = new Mock<IClienteRepository>();
+            var mediatr = new Mock<IMediator>();
+            var clienteService = new ClienteService(clienteRepository.Object, mediatr.Object);
+            clienteRepository.Setup(repo => repo.ObterTodos()).Returns(_clienteTestsBogus.GerarClientes());
+
+            //Act
+            var clientes = clienteService.ObterTodosAtivos();
+
+            //Assert
+            Assert.True(clientes.Any());
+            Assert.False(clientes.Count(c => !c.Ativo) > 0);
         }
     }
 }
